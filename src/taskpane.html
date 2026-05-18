@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Send Guard</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <link rel="stylesheet" href="./taskpane.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <p class="eyebrow">Data Governance</p>
+        <h1>Review send warnings</h1>
+      </header>
+
+      <section id="status" class="status" aria-live="polite">Checking this email...</section>
+      <section id="warnings" class="warnings"></section>
+
+      <label class="acknowledgement">
+        <input id="acknowledgement" type="checkbox" />
+        <span id="acknowledgementText"></span>
+      </label>
+
+      <div class="actions">
+        <button id="refresh" type="button" class="secondary">Refresh</button>
+        <button id="sendAnyway" type="button" disabled>Send anyway</button>
+      </div>
+    </main>
+
+    <script src="./config.js"></script>
+    <script src="./shared.js"></script>
+    <script src="./taskpane.js"></script>
+  </body>
+</html>

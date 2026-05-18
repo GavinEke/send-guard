@@ -1,0 +1,6 @@
+{
+  "organisationDomains": [],
+  "sensitiveTerms": ["client", "credit card"],
+  "visibleRecipientLimit": 10,
+  "acknowledgementText": "I confirm this email complies with my organisation's data governance policy."
+}
