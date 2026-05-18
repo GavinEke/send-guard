@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Upload this manifest in Microsoft 365 admin center > Integrated apps > Upload custom apps after hosting the add-in files at https://send-guard.gavin.cloud. -->
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+           xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
+           xsi:type="MailApp">
+  <Id>9f5c601a-8ef0-46b5-aeb2-4e5803f2ff5b</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Gavin</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="Send Guard"/>
+  <Description DefaultValue="Warns users before sending messages with many visible recipients or sensitive content to external recipients."/>
+  <IconUrl DefaultValue="https://send-guard.gavin.cloud/assets/icon-64.png"/>
+  <HighResolutionIconUrl DefaultValue="https://send-guard.gavin.cloud/assets/icon-128.png"/>
+  <SupportUrl DefaultValue="https://send-guard.gavin.cloud"/>
+  <AppDomains>
+    <AppDomain>https://send-guard.gavin.cloud</AppDomain>
+  </AppDomains>
+  <Hosts>
+    <Host Name="Mailbox"/>
+  </Hosts>
+  <Requirements>
+    <Sets>
+      <Set Name="Mailbox" MinVersion="1.12"/>
+    </Sets>
+  </Requirements>
+  <FormSettings>
+    <Form xsi:type="ItemRead">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="https://send-guard.gavin.cloud/src/taskpane.html"/>
+        <RequestedHeight>250</RequestedHeight>
+      </DesktopSettings>
+    </Form>
+  </FormSettings>
+  <Permissions>ReadWriteItem</Permissions>
+  <Rule xsi:type="RuleCollection" Mode="Or">
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
+  </Rule>
+  <DisableEntityHighlighting>false</DisableEntityHighlighting>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1" xsi:type="VersionOverridesV1_1">
+      <Requirements>
+        <bt:Sets DefaultMinVersion="1.12">
+          <bt:Set Name="Mailbox"/>
+        </bt:Sets>
+      </Requirements>
+      <Hosts>
+        <Host xsi:type="MailHost">
+          <Runtimes>
+            <Runtime resid="Runtime.Url">
+              <Override type="javascript" resid="RuntimeClassicJs.Url"/>
+            </Runtime>
+          </Runtimes>
+          <DesktopFormFactor>
+            <FunctionFile resid="Commands.Url"/>
+            <ExtensionPoint xsi:type="MessageComposeCommandSurface">
+              <OfficeTab id="TabDefault">
+                <Group id="Governance.Group">
+                  <Label resid="Group.Label"/>
+                  <Control xsi:type="Button" id="OpenPane.Button">
+                    <Label resid="OpenPane.Label"/>
+                    <Supertip>
+                      <Title resid="OpenPane.Label"/>
+                      <Description resid="OpenPane.Tooltip"/>
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" resid="Icon.16"/>
+                      <bt:Image size="32" resid="Icon.32"/>
+                      <bt:Image size="80" resid="Icon.80"/>
+                    </Icon>
+                    <Action xsi:type="ShowTaskpane">
+                      <SourceLocation resid="Taskpane.Url"/>
+                    </Action>
+                  </Control>
+                </Group>
+              </OfficeTab>
+            </ExtensionPoint>
+            <ExtensionPoint xsi:type="LaunchEvent">
+              <LaunchEvents>
+                <LaunchEvent Type="OnMessageSend" FunctionName="onMessageSendHandler" SendMode="Block"/>
+              </LaunchEvents>
+              <SourceLocation resid="Runtime.Url"/>
+            </ExtensionPoint>
+          </DesktopFormFactor>
+        </Host>
+      </Hosts>
+      <Resources>
+        <bt:Images>
+          <bt:Image id="Icon.16" DefaultValue="https://send-guard.gavin.cloud/assets/icon-16.png"/>
+          <bt:Image id="Icon.32" DefaultValue="https://send-guard.gavin.cloud/assets/icon-32.png"/>
+          <bt:Image id="Icon.80" DefaultValue="https://send-guard.gavin.cloud/assets/icon-80.png"/>
+        </bt:Images>
+        <bt:Urls>
+          <bt:Url id="Commands.Url" DefaultValue="https://send-guard.gavin.cloud/src/commands.html"/>
+          <bt:Url id="Runtime.Url" DefaultValue="https://send-guard.gavin.cloud/src/runtime.html"/>
+          <bt:Url id="RuntimeClassicJs.Url" DefaultValue="https://send-guard.gavin.cloud/src/runtime-classic.js"/>
+          <bt:Url id="Taskpane.Url" DefaultValue="https://send-guard.gavin.cloud/src/taskpane.html"/>
+        </bt:Urls>
+        <bt:ShortStrings>
+          <bt:String id="Group.Label" DefaultValue="Governance"/>
+          <bt:String id="OpenPane.Label" DefaultValue="Review send warnings"/>
+        </bt:ShortStrings>
+        <bt:LongStrings>
+          <bt:String id="OpenPane.Tooltip" DefaultValue="Review recipient and sensitive content warnings before sending."/>
+        </bt:LongStrings>
+      </Resources>
+    </VersionOverrides>
+  </VersionOverrides>
+</OfficeApp>
