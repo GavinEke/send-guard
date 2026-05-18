@@ -1,6 +1,27 @@
 Office.actions.associate("onMessageSendHandler", onMessageSendHandler);
 
 async function onMessageSendHandler(event) {
+  let completed = false;
+  const watchdog = setTimeout(() => {
+    complete({
+      allowEvent: false,
+      errorMessage:
+        "Send Guard needs you to review this email before sending. Select Review send warnings to open Send Guard.",
+      commandId: "OpenPane.Button",
+      contextData: JSON.stringify({ reason: "timeout" })
+    });
+  }, 3000);
+
+  function complete(options) {
+    if (completed) {
+      return;
+    }
+
+    completed = true;
+    clearTimeout(watchdog);
+    event.completed(options);
+  }
+
   try {
     await window.SendGuard.loadConfig();
     const snapshot = await window.SendGuard.getComposeSnapshot();
@@ -8,27 +29,29 @@ async function onMessageSendHandler(event) {
 
     if (evaluation.warnings.length === 0) {
       window.SendGuard.clearAcknowledgement();
-      event.completed({ allowEvent: true });
+      complete({ allowEvent: true });
       return;
     }
 
     if (window.SendGuard.hasCurrentAcknowledgement(evaluation)) {
       window.SendGuard.clearAcknowledgement();
-      event.completed({ allowEvent: true });
+      complete({ allowEvent: true });
       return;
     }
 
-    event.completed({
+    complete({
       allowEvent: false,
       errorMessage: window.SendGuard.smartAlertMessage(evaluation),
       commandId: "OpenPane.Button",
       contextData: JSON.stringify({ signature: evaluation.signature })
     });
   } catch (error) {
-    event.completed({
+    complete({
       allowEvent: false,
       errorMessage:
-        "The data governance send check could not complete. Try again, or contact your administrator if the problem continues."
+        "Send Guard needs you to review this email before sending. Select Review send warnings to open Send Guard.",
+      commandId: "OpenPane.Button",
+      contextData: JSON.stringify({ reason: "error" })
     });
   }
 }

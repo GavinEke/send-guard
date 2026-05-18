@@ -1,5 +1,7 @@
 (function () {
   const ACK_KEY = "send-guard-acknowledgement";
+  const CONFIG_TIMEOUT_MS = 800;
+  const FIELD_TIMEOUT_MS = 1200;
   const defaultConfig = {
     organisationDomains: [],
     sensitiveTerms: ["client", "credit card"],
@@ -10,6 +12,27 @@
   Office.actions.associate("onMessageSendHandler", onMessageSendHandler);
 
   async function onMessageSendHandler(event) {
+    let completed = false;
+    const watchdog = setTimeout(() => {
+      complete({
+        allowEvent: false,
+        errorMessage:
+          "Send Guard needs you to review this email before sending. Select Review send warnings to open Send Guard.",
+        commandId: "OpenPane.Button",
+        contextData: JSON.stringify({ reason: "timeout" })
+      });
+    }, 3000);
+
+    function complete(options) {
+      if (completed) {
+        return;
+      }
+
+      completed = true;
+      clearTimeout(watchdog);
+      event.completed(options);
+    }
+
     try {
       await loadConfig();
       const snapshot = await getComposeSnapshot();
@@ -17,27 +40,29 @@
 
       if (evaluation.warnings.length === 0) {
         clearAcknowledgement();
-        event.completed({ allowEvent: true });
+        complete({ allowEvent: true });
         return;
       }
 
       if (hasCurrentAcknowledgement(evaluation)) {
         clearAcknowledgement();
-        event.completed({ allowEvent: true });
+        complete({ allowEvent: true });
         return;
       }
 
-      event.completed({
+      complete({
         allowEvent: false,
         errorMessage: smartAlertMessage(evaluation),
         commandId: "OpenPane.Button",
         contextData: JSON.stringify({ signature: evaluation.signature })
       });
     } catch (error) {
-      event.completed({
+      complete({
         allowEvent: false,
         errorMessage:
-          "The data governance send check could not complete. Try again, or contact your administrator if the problem continues."
+          "Send Guard needs you to review this email before sending. Select Review send warnings to open Send Guard.",
+        commandId: "OpenPane.Button",
+        contextData: JSON.stringify({ reason: "error" })
       });
     }
   }
@@ -46,22 +71,37 @@
     try {
       const runtimeUrl = Office.context.urls && Office.context.urls.javascriptRuntimeUrl;
       const configUrl = runtimeUrl ? new URL("./config.json", runtimeUrl).href : "./config.json";
-      const response = await fetch(configUrl, { cache: "no-store" });
+      const response = await withTimeout(fetch(configUrl, { cache: "no-store" }), CONFIG_TIMEOUT_MS, null);
       if (response.ok) {
-        config = Object.assign({}, defaultConfig, await response.json());
+        const configJson = await withTimeout(response.json(), CONFIG_TIMEOUT_MS, null);
+        if (configJson) {
+          config = Object.assign({}, defaultConfig, configJson);
+        }
       }
     } catch (error) {
       config = defaultConfig;
     }
   }
 
-  function getAsyncValue(source, coercionType) {
-    return new Promise((resolve, reject) => {
+  function getAsyncValue(source, coercionType, fallback) {
+    return new Promise((resolve) => {
+      let settled = false;
+      const timeout = setTimeout(() => {
+        settled = true;
+        resolve(fallback);
+      }, FIELD_TIMEOUT_MS);
+
       const callback = (result) => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        clearTimeout(timeout);
         if (result.status === Office.AsyncResultStatus.Succeeded) {
-          resolve(result.value || "");
+          resolve(result.value || fallback);
         } else {
-          reject(result.error);
+          resolve(fallback);
         }
       };
 
@@ -76,10 +116,10 @@
   async function getComposeSnapshot() {
     const item = Office.context.mailbox.item;
     const [to, cc, subject, htmlBody] = await Promise.all([
-      getAsyncValue(item.to),
-      getAsyncValue(item.cc),
-      getAsyncValue(item.subject),
-      getAsyncValue(item.body, Office.CoercionType.Html)
+      getAsyncValue(item.to, null, []),
+      getAsyncValue(item.cc, null, []),
+      getAsyncValue(item.subject, null, ""),
+      getAsyncValue(item.body, Office.CoercionType.Html, "")
     ]);
 
     return {
@@ -204,9 +244,24 @@
     return [
       "Review this email before sending.",
       ...lines,
-      "Use Review send warnings to acknowledge your organisation's data governance policy."
+      "Select Review send warnings to open Send Guard and acknowledge your organisation's data governance policy."
     ]
       .join("\n")
       .slice(0, 500);
+  }
+
+  function withTimeout(promise, timeoutMs, fallback) {
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => resolve(fallback), timeoutMs);
+      promise
+        .then((value) => {
+          clearTimeout(timeout);
+          resolve(value);
+        })
+        .catch(() => {
+          clearTimeout(timeout);
+          resolve(fallback);
+        });
+    });
   }
 })();

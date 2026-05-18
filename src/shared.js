@@ -1,12 +1,14 @@
 (function () {
   const ACK_KEY = "send-guard-acknowledgement";
+  const CONFIG_TIMEOUT_MS = 800;
+  const FIELD_TIMEOUT_MS = 1200;
 
   function getConfig() {
     return window.SendGuardConfig || {};
   }
 
   function loadConfig() {
-    return window.SendGuardConfigPromise || Promise.resolve(getConfig());
+    return withTimeout(window.SendGuardConfigPromise || Promise.resolve(getConfig()), CONFIG_TIMEOUT_MS, getConfig());
   }
 
   function getMailboxItem() {
@@ -41,13 +43,25 @@
     return normaliseEmail(recipient && (recipient.emailAddress || recipient.displayName || ""));
   }
 
-  function getAsyncValue(source, coercionType) {
-    return new Promise((resolve, reject) => {
+  function getAsyncValue(source, coercionType, fallback) {
+    return new Promise((resolve) => {
+      let settled = false;
+      const timeout = setTimeout(() => {
+        settled = true;
+        resolve(fallback);
+      }, FIELD_TIMEOUT_MS);
+
       const callback = (result) => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        clearTimeout(timeout);
         if (result.status === Office.AsyncResultStatus.Succeeded) {
-          resolve(result.value || "");
+          resolve(result.value || fallback);
         } else {
-          reject(result.error);
+          resolve(fallback);
         }
       };
 
@@ -62,10 +76,10 @@
   async function getComposeSnapshot() {
     const item = getMailboxItem();
     const [to, cc, subject, htmlBody] = await Promise.all([
-      getAsyncValue(item.to),
-      getAsyncValue(item.cc),
-      getAsyncValue(item.subject),
-      getAsyncValue(item.body, Office.CoercionType.Html)
+      getAsyncValue(item.to, null, []),
+      getAsyncValue(item.cc, null, []),
+      getAsyncValue(item.subject, null, ""),
+      getAsyncValue(item.body, Office.CoercionType.Html, "")
     ]);
 
     return {
@@ -185,10 +199,25 @@
     return [
       "Review this email before sending.",
       ...lines,
-      "Use Review send warnings to acknowledge your organisation's data governance policy."
+      "Select Review send warnings to open Send Guard and acknowledge your organisation's data governance policy."
     ]
       .join("\n")
       .slice(0, 500);
+  }
+
+  function withTimeout(promise, timeoutMs, fallback) {
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => resolve(fallback), timeoutMs);
+      promise
+        .then((value) => {
+          clearTimeout(timeout);
+          resolve(value);
+        })
+        .catch(() => {
+          clearTimeout(timeout);
+          resolve(fallback);
+        });
+    });
   }
 
   window.SendGuard = {

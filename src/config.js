@@ -1,4 +1,5 @@
 (function () {
+  const CONFIG_TIMEOUT_MS = 800;
   const defaults = {
     organisationDomains: [],
     sensitiveTerms: ["client", "credit card"],
@@ -7,7 +8,7 @@
   };
 
   window.SendGuardConfig = defaults;
-  window.SendGuardConfigPromise = fetch("./config.json", { cache: "no-store" })
+  window.SendGuardConfigPromise = withTimeout(fetch("./config.json", { cache: "no-store" }), CONFIG_TIMEOUT_MS, null)
     .then((response) => {
       if (!response.ok) {
         return defaults;
@@ -19,4 +20,19 @@
       return window.SendGuardConfig;
     })
     .catch(() => defaults);
+
+  function withTimeout(promise, timeoutMs, fallback) {
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => resolve(fallback), timeoutMs);
+      promise
+        .then((value) => {
+          clearTimeout(timeout);
+          resolve(value);
+        })
+        .catch(() => {
+          clearTimeout(timeout);
+          resolve(fallback);
+        });
+    });
+  }
 })();
