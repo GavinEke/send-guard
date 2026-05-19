@@ -8,7 +8,7 @@
   };
 
   window.SendGuardConfig = defaults;
-  window.SendGuardConfigPromise = withTimeout(fetch("./config.json", { cache: "no-store" }), CONFIG_TIMEOUT_MS, null)
+  window.SendGuardConfigPromise = withTimeout(fetch("./config.json?v=1.0.2", { cache: "no-store" }), CONFIG_TIMEOUT_MS, null)
     .then((response) => {
       if (!response.ok) {
         return defaults;

@@ -70,7 +70,7 @@
   async function loadConfig() {
     try {
       const runtimeUrl = Office.context.urls && Office.context.urls.javascriptRuntimeUrl;
-      const configUrl = runtimeUrl ? new URL("./config.json", runtimeUrl).href : "./config.json";
+      const configUrl = runtimeUrl ? new URL("./config.json?v=1.0.2", runtimeUrl).href : "./config.json?v=1.0.2";
       const response = await withTimeout(fetch(configUrl, { cache: "no-store" }), CONFIG_TIMEOUT_MS, null);
       if (response.ok) {
         const configJson = await withTimeout(response.json(), CONFIG_TIMEOUT_MS, null);

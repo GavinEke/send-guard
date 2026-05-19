@@ -32,6 +32,7 @@ JSON.parse(fs.readFileSync(path.join(root, "src/config.json"), "utf8"));
 const manifest = fs.readFileSync(path.join(root, "manifest.xml"), "utf8");
 const expectedManifestSnippets = [
   '<Set Name="Mailbox" MinVersion="1.12"/>',
+  '<Version>1.0.2.0</Version>',
   '<LaunchEvent Type="OnMessageSend" FunctionName="onMessageSendHandler" SendMode="Block"/>',
   '<Permissions>ReadWriteItem</Permissions>',
   '<Runtime resid="Runtime.Url">',
@@ -52,6 +53,20 @@ if (!productionManifest.includes("https://send-guard.gavin.cloud")) {
 
 if (productionManifest.includes("APP_BASE_URL")) {
   throw new Error("send-guard.xml should not contain APP_BASE_URL placeholders.");
+}
+
+if (!productionManifest.includes("?v=1.0.2")) {
+  throw new Error("send-guard.xml should include cache-busting resource URLs.");
+}
+
+const runtimeJs = fs.readFileSync(path.join(root, "src/runtime.js"), "utf8");
+if (!runtimeJs.includes("Office.onReady") || !runtimeJs.includes("Office.actions.associate")) {
+  throw new Error("src/runtime.js should initialise Office before associating event handlers.");
+}
+
+const commandsHtml = fs.readFileSync(path.join(root, "src/commands.html"), "utf8");
+if (!commandsHtml.includes("Office.onReady")) {
+  throw new Error("src/commands.html should call Office.onReady.");
 }
 
 console.log("Add-in project checks passed.");

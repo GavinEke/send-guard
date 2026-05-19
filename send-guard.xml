@@ -6,13 +6,13 @@
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
   <Id>9f5c601a-8ef0-46b5-aeb2-4e5803f2ff5b</Id>
-  <Version>1.0.1.0</Version>
+  <Version>1.0.2.0</Version>
   <ProviderName>Gavin</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Send Guard"/>
   <Description DefaultValue="Warns users before sending messages with many visible recipients or sensitive content to external recipients."/>
-  <IconUrl DefaultValue="https://send-guard.gavin.cloud/assets/icon-64.png"/>
-  <HighResolutionIconUrl DefaultValue="https://send-guard.gavin.cloud/assets/icon-128.png"/>
+  <IconUrl DefaultValue="https://send-guard.gavin.cloud/assets/icon-64.png?v=1.0.2"/>
+  <HighResolutionIconUrl DefaultValue="https://send-guard.gavin.cloud/assets/icon-128.png?v=1.0.2"/>
   <SupportUrl DefaultValue="https://send-guard.gavin.cloud"/>
   <AppDomains>
     <AppDomain>https://send-guard.gavin.cloud</AppDomain>
@@ -28,7 +28,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://send-guard.gavin.cloud/src/taskpane.html"/>
+        <SourceLocation DefaultValue="https://send-guard.gavin.cloud/src/taskpane.html?v=1.0.2"/>
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -88,15 +88,15 @@
       </Hosts>
       <Resources>
         <bt:Images>
-          <bt:Image id="Icon.16" DefaultValue="https://send-guard.gavin.cloud/assets/icon-16.png"/>
-          <bt:Image id="Icon.32" DefaultValue="https://send-guard.gavin.cloud/assets/icon-32.png"/>
-          <bt:Image id="Icon.80" DefaultValue="https://send-guard.gavin.cloud/assets/icon-80.png"/>
+          <bt:Image id="Icon.16" DefaultValue="https://send-guard.gavin.cloud/assets/icon-16.png?v=1.0.2"/>
+          <bt:Image id="Icon.32" DefaultValue="https://send-guard.gavin.cloud/assets/icon-32.png?v=1.0.2"/>
+          <bt:Image id="Icon.80" DefaultValue="https://send-guard.gavin.cloud/assets/icon-80.png?v=1.0.2"/>
         </bt:Images>
         <bt:Urls>
-          <bt:Url id="Commands.Url" DefaultValue="https://send-guard.gavin.cloud/src/commands.html"/>
-          <bt:Url id="Runtime.Url" DefaultValue="https://send-guard.gavin.cloud/src/runtime.html"/>
-          <bt:Url id="RuntimeClassicJs.Url" DefaultValue="https://send-guard.gavin.cloud/src/runtime-classic.js"/>
-          <bt:Url id="Taskpane.Url" DefaultValue="https://send-guard.gavin.cloud/src/taskpane.html"/>
+          <bt:Url id="Commands.Url" DefaultValue="https://send-guard.gavin.cloud/src/commands.html?v=1.0.2"/>
+          <bt:Url id="Runtime.Url" DefaultValue="https://send-guard.gavin.cloud/src/runtime.html?v=1.0.2"/>
+          <bt:Url id="RuntimeClassicJs.Url" DefaultValue="https://send-guard.gavin.cloud/src/runtime-classic.js?v=1.0.2"/>
+          <bt:Url id="Taskpane.Url" DefaultValue="https://send-guard.gavin.cloud/src/taskpane.html?v=1.0.2"/>
         </bt:Urls>
         <bt:ShortStrings>
           <bt:String id="Group.Label" DefaultValue="Governance"/>

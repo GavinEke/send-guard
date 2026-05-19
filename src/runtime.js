@@ -1,5 +1,3 @@
-Office.actions.associate("onMessageSendHandler", onMessageSendHandler);
-
 async function onMessageSendHandler(event) {
   let completed = false;
   const watchdog = setTimeout(() => {
@@ -55,3 +53,7 @@ async function onMessageSendHandler(event) {
     });
   }
 }
+
+Office.onReady(() => {
+  Office.actions.associate("onMessageSendHandler", onMessageSendHandler);
+});
